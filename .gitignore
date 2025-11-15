@@ -1,0 +1,41 @@
+# Build results
+bin/
+obj/
+
+# Visual Studio cache/options
+.vs/
+.vscode/
+
+# Dotnet tools
+*.user
+*.suo
+
+# Logs
+*.log
+
+# Local database files
+*.db
+*.sqlite
+
+# Secrets
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.json
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# NuGet packages
+*.nupkg
+packages/
+
+# Rider / JetBrains
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Publish folders
+publish/

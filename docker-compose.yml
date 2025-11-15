@@ -1,0 +1,25 @@
+services:
+  mysql_dev:
+    image: mysql:8.0
+    container_name: mysql_dev
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: produtos_db
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: appuser123
+    ports:
+      - "3306:3306"
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  adminer:
+    image: adminer
+    container_name: adminer_dev
+    restart: always
+    ports:
+      - "8080:8080"
+
+volumes:
+  mysql_data:
