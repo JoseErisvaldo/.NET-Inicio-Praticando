@@ -1,0 +1,24 @@
+meta {
+  name: PUT - ID - USER
+  type: http
+  seq: 4
+}
+
+put {
+  url: http://localhost:5012/api/user/ba3c017e-e479-4d8e-9eb7-e1be2d4a1b7b
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Gael",
+    "email": "Santos",
+    "whatsapp": "11958790531"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
