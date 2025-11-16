@@ -7,38 +7,34 @@ using MinhaApi.Repositories;
 var builder = WebApplication.CreateBuilder(args);
 
 // ---------------------------------------------------------
-// 🌐 1) Configurar Kestrel para a porta da Railway
+// 🔌 1) Connection string (Railway → Local fallback)
 // ---------------------------------------------------------
-builder.WebHost.ConfigureKestrel(options =>
+var host = Environment.GetEnvironmentVariable("MYSQL_HOST");
+var port = Environment.GetEnvironmentVariable("MYSQL_PORT") ?? "3306";
+var user = Environment.GetEnvironmentVariable("MYSQL_USER");
+var pass = Environment.GetEnvironmentVariable("MYSQL_PASSWORD");
+var db = Environment.GetEnvironmentVariable("MYSQL_DATABASE");
+
+string connectionString;
+
+if (!string.IsNullOrEmpty(host))
 {
-    var runtimePort = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-    options.ListenAnyIP(int.Parse(runtimePort));
-});
-
-// ---------------------------------------------------------
-// 🔌 2) Obter connection string (local ou Railway)
-// ---------------------------------------------------------
-string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-if (string.IsNullOrWhiteSpace(connectionString))
-{
-    var host = Environment.GetEnvironmentVariable("MYSQLHOST") ?? "localhost";
-    var mysqlPort = Environment.GetEnvironmentVariable("MYSQLPORT") ?? "3306";
-    var user = Environment.GetEnvironmentVariable("MYSQLUSER") ?? "root";
-    var pwd = Environment.GetEnvironmentVariable("MYSQLPASSWORD") ?? "";
-    var db = Environment.GetEnvironmentVariable("MYSQLDATABASE") ?? "produtos_db";
-
+    // ✔ Railway
     connectionString =
-        $"Server={host};Port={mysqlPort};Database={db};Uid={user};Pwd={pwd};AllowPublicKeyRetrieval=True;SslMode=None";
+        $"Server={host};Port={port};Database={db};User={user};Password={pass};SslMode=None;";
+}
+else
+{
+    // ✔ Local (via appsettings.json)
+    connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 }
 
-// Registrar DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 
 // ---------------------------------------------------------
-// 🧱 3) Services, Repositories, AutoMapper, Swagger
+// 🧱 2) Services, Repos, AutoMapper, Swagger
 // ---------------------------------------------------------
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -52,15 +48,14 @@ var app = builder.Build();
 
 
 // ---------------------------------------------------------
-// 🗄️ 4) Aplicar migrations automaticamente
+// 🗄️ 3) Auto Migrate
 // ---------------------------------------------------------
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
+    var dbCtx = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     try
     {
-        db.Database.Migrate();
+        dbCtx.Database.Migrate();
         Console.WriteLine("✔ Migrations applied successfully!");
     }
     catch (Exception ex)
@@ -71,7 +66,7 @@ using (var scope = app.Services.CreateScope())
 
 
 // ---------------------------------------------------------
-// 🚀 5) Pipeline
+// 🚀 4) Pipeline
 // ---------------------------------------------------------
 if (app.Environment.IsDevelopment())
 {
