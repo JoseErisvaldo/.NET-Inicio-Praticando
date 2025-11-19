@@ -20,6 +20,7 @@ public class ProductRepository : IProductRepository
 
     public async Task<Product?> GetByIdAsync(int id)
     {
+        Console.WriteLine($"Buscando produto com ID: {id}");
         return await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
     }
 
